@@ -70,7 +70,7 @@ def find_coms_dict(labeling):
     return clusters
 
 
-def fsp(G, k_gravity, k_coul, seed=None, max_iter= 1000):
+def flp(G, k_gravity, k_coul, seed=None, max_iter= 1000):
     attribute = "protected"
     coloring = _color_network(G)
     random.seed(seed)
