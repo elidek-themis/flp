@@ -22,12 +22,10 @@ def init_balance_data(labeling, G, attribute):
         }
     return balance_data
 
-
 def find_balance(red, blue):
     if red > 0 and blue > 0:
         return (blue / red, 1) if red >= blue else (red / blue, 0)
     return (0, 1) if red > 0 else (0, 0)
-
 
 def update_balance_data(operation, balance_data, com, node_attr):
     if operation == "addition":
@@ -49,11 +47,9 @@ def update_balance_data(operation, balance_data, com, node_attr):
     if balance_data[com]["size"] == 0:
         balance_data.pop(com)
 
-
 def delta(node, com, balance_data, G, attribute):
     node_attr = G.nodes[node][attribute]
     return -1 if node_attr == balance_data[com]["more_red"] else 1
-
 
 def find_coms(labeling):
     clusters = defaultdict(set)
@@ -62,13 +58,11 @@ def find_coms(labeling):
     coms = frozenset(frozenset(nodes) for nodes in clusters.values())
     return coms
 
-
 def find_coms_dict(labeling):
     clusters = defaultdict(set)
     for node, label in labeling.items():
         clusters[label].add(node)
     return clusters
-
 
 def flp(G, k_gravity, k_coul, seed=None, max_iter= 1000):
     attribute = "protected"
@@ -92,12 +86,12 @@ def flp(G, k_gravity, k_coul, seed=None, max_iter= 1000):
         current_com = find_coms(labeling)
         print(f"iterations {iterations}")
         if current_com in previous_coms:
-            flag = "oscillation_{iterations}"
-            print(f"coms Oscillation detected at iteration {iterations}!")
+            flag = f"oscillation_{iterations}"
+            print(f"Oscillation detected at iteration {iterations}!")
             break
        
         if iterations == max_iter:
-            flag = "max_iterations_{iterations}"
+            flag = f"max_iterations_{iterations}"
             break
         previous_coms.append(current_com)
 
@@ -105,6 +99,8 @@ def flp(G, k_gravity, k_coul, seed=None, max_iter= 1000):
             for node in nodes:
                 _update_label(node, labeling, G, balance_data, k_gravity, k_coul, attribute)
 
+    if flag ==None:
+        flag = f"max_iterations_{iterations}"
     clusters = defaultdict(set)
     for node, label in labeling.items():
         clusters[label].add(node)
@@ -113,7 +109,6 @@ def flp(G, k_gravity, k_coul, seed=None, max_iter= 1000):
     df.reset_index(inplace=True)
     df.rename(columns={'index': 'community'}, inplace=True)
     return clusters.values(), df, flag
-
 
 def _color_network(G):
     coloring = {}
@@ -125,13 +120,11 @@ def _color_network(G):
             coloring[color] = {node}
     return coloring
 
-
 def _labeling_complete(labeling, G, balance_data, k_gravity, k_coul):
     return all(
         labeling[v] in _best_labels(v, labeling, G, balance_data, k_gravity, k_coul)
         for v in G
         if len(G[v]) > 0)
-
 
 def _best_labels(node, labeling, G, balance_data, k_gravity, k_coul):
     if not G[node]:
@@ -143,13 +136,13 @@ def _best_labels(node, labeling, G, balance_data, k_gravity, k_coul):
         if(labeling[node]==com):
             node_attr = G.nodes[node]["protected"]
             update_balance_data("reduction", balance_data, labeling[node], node_attr)
-            delta = delta(node, com, balance_data, G, "protected")
+            d = delta(node, com, balance_data, G, "protected")
             imbalance_c = 1 - balance_data[com]["balance"]
             update_balance_data("addition", balance_data, labeling[node], node_attr)
         else: 
-            delta = delta(node, com, balance_data, G, "protected")
+            d = delta(node, com, balance_data, G, "protected")
             imbalance_c = 1 - balance_data[com]["balance"]
-        metrics[com] = n_cx * (k_gravity + k_coul * delta * imbalance_c)
+        metrics[com] = n_cx * (k_gravity + k_coul * d * imbalance_c)
 
     max_value = max(metrics.values())
     return {label for label, value in metrics.items() if value == max_value}
