@@ -84,7 +84,7 @@ def flp(G, k_gravity, k_coul, seed=None, max_iter= 1000):
     while not _labeling_complete(labeling, G, balance_data, k_gravity, k_coul):
         iterations += 1
         current_com = find_coms(labeling)
-        print(f"iterations {iterations}")
+        # print(f"inside iteration {iterations}")
         if current_com in previous_coms:
             flag = f"oscillation_{iterations}"
             print(f"Oscillation detected at iteration {iterations}!")
